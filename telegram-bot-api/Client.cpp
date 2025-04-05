@@ -7090,6 +7090,9 @@ void Client::on_update_authorization_state() {
   CHECK(authorization_state_ != nullptr);
   switch (authorization_state_->get_id()) {
     case td_api::authorizationStateWaitTdlibParameters::ID: {
+      send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                                 make_object<td_api::proxyTypeHttp>("", "", false)),
+                   td::make_unique<TdOnOkCallback>());
       for (td::string option : {"disable_network_statistics", "disable_time_adjustment_protection", "ignore_file_names",
                                 "ignore_inline_thumbnails", "reuse_uploaded_photos_by_hash", "use_storage_optimizer"}) {
         send_request(make_object<td_api::setOption>(option, make_object<td_api::optionValueBoolean>(true)),
@@ -7112,6 +7115,9 @@ void Client::on_update_authorization_state() {
       return send_request(std::move(request), td::make_unique<TdOnInitCallback>(this));
     }
     case td_api::authorizationStateWaitPhoneNumber::ID:
+      send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                                 make_object<td_api::proxyTypeHttp>("","",false)),
+                   td::make_unique<TdOnOkCallback>());
       send_request(make_object<td_api::setOption>("online", make_object<td_api::optionValueBoolean>(true)),
                    td::make_unique<TdOnOkCallback>());
       return send_request(make_object<td_api::checkAuthenticationBotToken>(bot_token_),
@@ -7253,6 +7259,9 @@ void Client::on_update(object_ptr<td_api::Object> result) {
     case td_api::updateFileGenerationStart::ID: {
       auto update = move_object_as<td_api::updateFileGenerationStart>(result);
       auto generation_id = update->generation_id_;
+      send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                                 make_object<td_api::proxyTypeHttp>("","",false)),
+                   td::make_unique<TdOnOkCallback>());
       send_request(
           make_object<td_api::finishFileGeneration>(generation_id, make_object<td_api::error>(400, "Wrong file_id")),
           td::make_unique<TdOnOkCallback>());
@@ -12911,6 +12920,9 @@ void Client::save_webhook() const {
 void Client::webhook_success() {
   next_bot_updates_warning_time_ = td::Time::now() + BOT_UPDATES_WARNING_DELAY;
   if (was_bot_updates_warning_) {
+    send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                               make_object<td_api::proxyTypeHttp>("","",false)),
+                 td::make_unique<TdOnOkCallback>());
     send_request(make_object<td_api::setBotUpdatesStatus>(0, ""), td::make_unique<TdOnOkCallback>());
     was_bot_updates_warning_ = false;
   }
@@ -12923,6 +12935,9 @@ void Client::webhook_error(td::Status status) {
 
   auto pending_update_count = get_pending_update_count();
   if (pending_update_count >= MIN_PENDING_UPDATES_WARNING && td::Time::now() > next_bot_updates_warning_time_) {
+    send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                               make_object<td_api::proxyTypeHttp>("","",false)),
+                 td::make_unique<TdOnOkCallback>());
     send_request(make_object<td_api::setBotUpdatesStatus>(td::narrow_cast<int32>(pending_update_count),
                                                           "Webhook error. " + last_webhook_error_.message().str()),
                  td::make_unique<TdOnOkCallback>());
@@ -13383,6 +13398,9 @@ void Client::do_get_updates(int32 offset, int32 limit, int32 timeout, PromisedQu
   previous_get_updates_finish_time_ = td::Time::now();
   next_bot_updates_warning_time_ = td::Time::now() + BOT_UPDATES_WARNING_DELAY;
   if (total_size == updates.size() && was_bot_updates_warning_) {
+    send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                               make_object<td_api::proxyTypeHttp>("","",false)),
+                 td::make_unique<TdOnOkCallback>());
     send_request(make_object<td_api::setBotUpdatesStatus>(0, ""), td::make_unique<TdOnOkCallback>());
     was_bot_updates_warning_ = false;
   }
@@ -13393,6 +13411,9 @@ void Client::long_poll_wakeup(bool force_flag) {
   if (!long_poll_query_) {
     auto pending_update_count = get_pending_update_count();
     if (pending_update_count >= MIN_PENDING_UPDATES_WARNING && td::Time::now() > next_bot_updates_warning_time_) {
+      send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                                 make_object<td_api::proxyTypeHttp>("","",false)),
+                   td::make_unique<TdOnOkCallback>());
       send_request(make_object<td_api::setBotUpdatesStatus>(td::narrow_cast<int32>(pending_update_count),
                                                             "The getUpdates method is not called for too long"),
                    td::make_unique<TdOnOkCallback>());
@@ -13858,6 +13879,9 @@ bool Client::update_allowed_update_types(const Query *query) {
     } else {
       value = make_object<td_api::optionValueInteger>(allowed_update_types);
     }
+    send_request(make_object<td_api::addProxy>(parameters_->http_proxy_ip, parameters_->http_proxy_port, parameters_->enable_http_proxy,
+                                               make_object<td_api::proxyTypeHttp>("","",false)),
+                 td::make_unique<TdOnOkCallback>());
     send_request(make_object<td_api::setOption>("xallowed_update_types", std::move(value)),
                  td::make_unique<TdOnOkCallback>());
     return true;
